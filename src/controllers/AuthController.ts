@@ -71,11 +71,11 @@ export const login = async (req: Request, res: Response) => {
             { expiresIn: '1d' } // 1 din tak login rahega
         );
 
-        res.cookie('token', token, {
-        httpOnly: true,     
-        secure: process.env.NODE_ENV === 'production', 
-        sameSite: 'lax',   
-        maxAge: 24 * 60 * 60 * 1000 
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,     
+            sameSite: "none",    
+            maxAge: 24 * 60 * 60 * 1000 
     });
 
         // D. Response bhejo (Password hata kar)
