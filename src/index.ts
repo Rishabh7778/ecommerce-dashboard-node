@@ -22,7 +22,7 @@ app.use(cookieParser());
 const server = http.createServer(app);
 
 app.use(cors({
-    origin: ['http://localhost:5173', 'https://tiny-maamoul-ab5c83.netlify.app/'],
+    origin: ['http://localhost:5173', 'https://tiny-maamoul-ab5c83.netlify.app'], 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
