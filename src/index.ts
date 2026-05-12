@@ -15,7 +15,7 @@ import discountRoute from './routes/discountRoutes';
 import userRoutes from "./routes/userRoutes";
 
 const app = express();
-
+app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
 
