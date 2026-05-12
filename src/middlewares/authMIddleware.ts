@@ -12,8 +12,12 @@ interface AuthRequest extends Request {
 // A. Login Check Middleware
 // B. verifyToken update
 export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction) => {
-    // Pehle check karo cookies undefined toh nahi
-    const token = req.cookies ? req.cookies.token : null;
+  const authHeader = req.headers.authorization || req.headers.Authorization;
+    
+    // "Bearer ajsdhkashd..." isme se space ke baad wala hissa (token) nikalna
+    const token = typeof authHeader === 'string' && authHeader.startsWith("Bearer ") 
+                  ? authHeader.split(" ")[1] 
+                  : null;
 
     if (!token) {
         return res.status(403).json({ message: "Bhai, token gayab hai!" });
