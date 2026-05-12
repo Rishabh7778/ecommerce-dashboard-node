@@ -72,11 +72,11 @@ export const login = async (req: Request, res: Response) => {
         );
 
         res.cookie("token", token, {
-            httpOnly: true,
-            secure: true,     
-            sameSite: "none",    
-            maxAge: 24 * 60 * 60 * 1000 
-    });
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', // Localhost pe false, Live par true
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 24 * 60 * 60 * 1000 
+});
 
         // D. Response bhejo (Password hata kar)
         const { password: _, ...userData } = user;
