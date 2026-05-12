@@ -38,10 +38,12 @@ export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction)
     }
 };
 
-// B. Admin Check Middleware
 export const isAdmin = (req: AuthRequest, res: Response, next: NextFunction) => {
+    // 🔥 YEH LINE ADD KARO:
+    console.log("Token ke andar ka data:", req.user); 
+
     if (req.user && req.user.role === 'admin') {
-        next(); // User admin hai, aage badho
+        next(); 
     } else {
         return res.status(403).json({ message: "Access Denied! Ye sirf Admin ke liye hai." });
     }
