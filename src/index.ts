@@ -13,18 +13,19 @@ import cookieParser from 'cookie-parser';
 import complaintRoutes from './routes/complainRoutes';
 import discountRoute from './routes/discountRoutes';
 import userRoutes from "./routes/userRoutes";
+import offerRoutes from "./routes/offerRoutes";
 
 const app = express();
 app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
 
-
+//  'https://tiny-maamoul-ab5c83.netlify.app'
 
 const server = http.createServer(app);
 
 app.use(cors({
-    origin: ['http://localhost:5173', 'https://tiny-maamoul-ab5c83.netlify.app'], 
+    origin: ['http://localhost:5173', 'https://tiny-maamoul-ab5c83.netlify.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 }));
@@ -57,7 +58,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/complaints', complaintRoutes);
 app.use('/api/discounts', discountRoute);
 app.use('/api/users', userRoutes);
-
+app.use('/api/deals', offerRoutes);
 
 server.listen(5000, () => {
   console.log("Server running on port 5000");
