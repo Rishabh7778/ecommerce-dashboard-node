@@ -71,12 +71,13 @@ export const addProduct = async (req: Request, res: Response): Promise<void> => 
 // ==========================================
 export const getAllProducts = async (req: Request, res: Response): Promise<void> => {
     try {
-        // Query params se page aur limit nikalo (default: page 1, limit 12)
-        // Agar string "all" aaya limit me, toh pagination nahi karenge
         const page = parseInt(req.query.page as string) || 1;
         const limitStr = req.query.limit as string;
         
-        let limit = 12; // default 12 products per page
+        // 🔥 NAYA CODE: URL se category_id nikalo
+        const categoryId = req.query.category as string; 
+        
+        let limit = 12;
         let isPaginated = true;
 
         if (limitStr === 'all') {
@@ -87,12 +88,19 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
 
         const offset = (page - 1) * limit;
 
-        // 1. Total Count nikalna zaroori hai frontend ke pagination logic ke liye
-        const countSql = `SELECT COUNT(*) as total FROM products`;
-        const [countResult]: any = await db.query(countSql);
+        // 🔥 NAYA CODE: Total Count nikalte waqt bhi category check karo
+        let countSql = `SELECT COUNT(*) as total FROM products`;
+        let countParams: any[] = [];
+        
+        if (categoryId) {
+            countSql += ` WHERE category_id = ?`;
+            countParams.push(categoryId);
+        }
+        
+        const [countResult]: any = await db.query(countSql, countParams);
         const totalProducts = countResult[0].total;
 
-        // 2. Asli data fetch karna (LIMIT aur OFFSET ke sath)
+        // Asli data fetch karna
         let sql = `
             SELECT 
                 p.*, 
@@ -107,16 +115,21 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
             LEFT JOIN categories c ON p.category_id = c.id
         `;
 
-        let params: number[] = [];
+        let params: any[] = [];
+
+        // 🔥 NAYA CODE: Agar category_id hai, toh WHERE condition lagao
+        if (categoryId) {
+            sql += ` WHERE p.category_id = ?`;
+            params.push(categoryId);
+        }
 
         if (isPaginated) {
             sql += ` LIMIT ? OFFSET ?`;
-            params = [limit, offset];
+            params.push(limit, offset);
         }
 
         const [products] = await db.query(sql, params);
 
-        // 3. Response bhejna (products ke sath meta data bhi)
         if (isPaginated) {
             res.status(200).json({
                 products,
@@ -128,8 +141,6 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
                 }
             });
         } else {
-            // Agar limit=all bheja, toh direct array bhej do (Pichle format jaisa)
-            // Ye purane code ko break nahi hone dega jahan apne pagination handle nahi kiya tha
             res.status(200).json(products); 
         }
 
