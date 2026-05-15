@@ -65,23 +65,30 @@ export const verifyPayment = async (req: any, res: any) => {
             const internalOrderId = orderRows[0].id;
 
             // C. Insert Items into 'order_items' table
-            // C. Insert Items into 'order_items' table
             if (cartItems && cartItems.length > 0) {
-                // 🔥 Naya column 'delivery_status' add kiya
                 const itemSql = `INSERT INTO order_items (order_id, product_id, product_name, quantity, price, delivery_status) VALUES ?`;
                 
                 const values = cartItems.map((item: any) => [
                     internalOrderId, 
-                    item.id,          // product_id
-                    item.title,       // product_name
+                    item.id,          
+                    item.title,       
                     item.quantity, 
-                    item.price,       // Us time ka price
-                    'processing'      // 🔥 Default status har item ke liye
+                    item.price * item.quantity, // 🔥 FIX 1: 34 * 2 = 68 calculate hoke save hoga
+                    'processing'      
                 ]);
 
                 await db.query(itemSql, [values]);
+
+                // 🔥 FIX 2: STOCK MANAGEMENT LOGIC
+                // Har cart item ke liye database me stock minus karein
+                for (const item of cartItems) {
+                    // WHERE condition me >= item.quantity lagaya hai taaki stock negative na ho jaye
+                    const updateStockSql = `UPDATE products SET stockCount = stockCount - ? WHERE id = ? AND stockCount >= ?`;
+                    await db.query(updateStockSql, [item.quantity, item.id, item.quantity]);
+                }
             }
-            return res.status(200).json({ message: "Payment Verified & Order Placed!" });
+            
+            return res.status(200).json({ message: "Payment Verified, Order Placed & Stock Updated!" });
         } else {
             return res.status(400).json({ message: "Invalid Signature" });
         }

@@ -7,33 +7,37 @@ import {
     deleteProduct ,
     bulkAddProducts,
     getAllCategories,
-    getDashboardStats
+    getDashboardStats,
+    addReview,
+    getProductReviews
 } from '../controllers/productController';
 import { upload } from '../middlewares/cloudinaryConfig';
-
+import { verifyToken } from '../middlewares/authMIddleware'; 
 
 const router = express.Router();
 
-// Create (Bulk & Single)
-router.post('/add',upload.array('images', 10), addProduct);
-router.post('/bulk-add',upload.array('images', 10), bulkAddProducts);
+// ==========================================
+// 1. STATIC ROUTES (Hamesha Upar Rakhein)
+// ==========================================
+router.post('/add', upload.array('images', 10), addProduct);
+router.post('/bulk-add', upload.array('images', 10), bulkAddProducts);
 
-// Read All
 router.get('/getAll', getAllProducts);
-
-// Read One
-router.get('/get/:id', getProductById);
-
 router.get('/dashboard-stats', getDashboardStats);
-
 router.get('/categories/getAll', getAllCategories);
 
-// Update (Edit)
+// Review Post karne ka route
+router.post('/review', verifyToken, addReview);
+
+
+// ==========================================
+// 2. DYNAMIC ROUTES (Hamesha Niche Rakhein)
+// ==========================================
+// Ye routes jinme ':id' hai, unko sabse last mein rakhna safe hota hai
+router.get('/get/:id', getProductById);
+router.get('/review/:id', getProductReviews);
+
 router.put('/update/:id', upload.array('images', 10), updateProduct);
-
-// Delete
 router.delete('/delete/:id', deleteProduct);
-
-
 
 export default router;

@@ -366,4 +366,70 @@ export const getDashboardStats = async (req: any, res: any) => {
         console.error("Dashboard API Error:", error.message); // Taki backend terminal me error dikhe
         res.status(500).json({ error: error.message });
     }
+    
+};
+
+
+// Add Review API
+export const addReview = async (req: any, res: any) => {
+    try {
+        const userId = req.user.id;
+        const { product_id, rating, review_text } = req.body;
+
+        // Required fields check
+        if (!product_id || !rating || !review_text) {
+            return res.status(400).json({
+                message: "All fields are required"
+            });
+        }
+
+        // Rating validation
+        if (rating < 1 || rating > 5) {
+            return res.status(400).json({
+                message: "Rating must be between 1 and 5"
+            });
+        }
+
+        const sql = `
+            INSERT INTO product_reviews 
+            (product_id, user_id, rating, review_text) 
+            VALUES (?, ?, ?, ?)
+        `;
+
+        await db.query(sql, [
+            product_id,
+            userId,
+            rating,
+            review_text
+        ]);
+
+        res.status(201).json({
+            success: true,
+            message: "Review added successfully!"
+        });
+
+    } catch (error: any) {
+        console.error("Add Review Error:", error);
+
+        res.status(500).json({
+            error: error.message
+        });
+    }
+};
+
+export const getProductReviews = async (req: any, res: any) => {
+    try {
+        const { id } = req.params;
+        const sql = `
+            SELECT pr.*, u.name as userName 
+            FROM product_reviews pr
+            JOIN users u ON pr.user_id = u.id
+            WHERE pr.product_id = ?
+            ORDER BY pr.created_at DESC
+        `;
+        const [reviews] = await db.query(sql, [id]);
+        res.status(200).json({ success: true, reviews });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
 };
