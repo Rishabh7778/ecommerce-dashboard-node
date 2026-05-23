@@ -123,6 +123,8 @@ export const getAllProducts = async (req: Request, res: Response): Promise<void>
             params.push(categoryId);
         }
 
+        sql += ` ORDER BY p.id DESC`;
+
         if (isPaginated) {
             sql += ` LIMIT ? OFFSET ?`;
             params.push(limit, offset);

@@ -38,6 +38,7 @@ export const getDeals = async (req: Request, res: Response) => {
                 (UNIX_TIMESTAMP(d.target_date) * 1000) AS targetDate 
             FROM deals_of_the_day d
             JOIN products p ON d.product_id = p.id
+            WHERE d.target_date > NOW()
             ORDER BY d.created_at DESC
         `;
         const [deals] = await db.query<RowDataPacket[]>(sql);
