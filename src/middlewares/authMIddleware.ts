@@ -9,29 +9,29 @@ interface AuthRequest extends Request {
     user?: any;
 }
 
-// A. Login Check Middleware
-// B. verifyToken update
 export const verifyToken = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.headers.authorization || req.headers.Authorization;
-    
-    // "Bearer ajsdhkashd..." isme se space ke baad wala hissa (token) nikalna
-    const token = typeof authHeader === 'string' && authHeader.startsWith("Bearer ") 
-                  ? authHeader.split(" ")[1] 
-                  : null;
+    // 1. Pehle token ko cookies se nikalne ka try karo (Kyunki login mein cookie set ki hai)
+    let token = req.cookies?.token; 
 
+    // 2. Agar cookie mein nahi hai, tab Headers check karo (Postman waghera ke liye fallback)
     if (!token) {
-        return res.status(403).json({ message: "Bhai, token gayab hai!" });
+        const authHeader = req.headers.authorization || req.headers.Authorization;
+        token = typeof authHeader === 'string' && authHeader.startsWith("Bearer ") 
+            ? authHeader.split(" ")[1] 
+            : null;
+    }
+
+    // 3. Status 403 ki jagah 401 karo taaki frontend ka refresh logic trigger ho
+    if (!token) {
+        return res.status(401).json({ message: "Bhai, token gayab hai!" });
     }
 
     try {
-        // 🔥 DEBUG: Secret key console mein print karke check karo
-        // console.log("Verifying with secret:", process.env.JWT_SECRET || 'secret_key');
-        
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret_key');
+        // 4. JWT_SECRET ki jagah ACCESS_TOKEN_SECRET use karo
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET || 'secret_key');
         req.user = decoded;
         next();
     } catch (err: any) {
-        // 🔥 Yahan se pata chalega ki token kyun invalid hai
         console.error("JWT Verification Error:", err.message);
         
         if (err.name === 'TokenExpiredError') {
