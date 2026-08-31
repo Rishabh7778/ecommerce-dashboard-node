@@ -66,7 +66,7 @@ export const verifyPayment = async (req: any, res: any) => {
 
             // C. Insert Items into 'order_items' table
             if (cartItems && cartItems.length > 0) {
-                const itemSql = `INSERT INTO order_items (order_id, product_id, product_name, quantity, price, delivery_status, original_price, discount_amount, discount_label) VALUES ?`;
+                const itemSql = `INSERT INTO order_items (order_id, product_id, product_name, quantity, price, delivery_status, original_price, discount_amount, discount_label, product_image) VALUES ?`;
                 
                 const values = cartItems.map((item: any) => [
                     internalOrderId, 
@@ -77,7 +77,8 @@ export const verifyPayment = async (req: any, res: any) => {
                     'processing',
                     (item.originalPrice || item.price) * item.quantity,
                     Math.max(0, ((item.originalPrice || item.price) - item.price) * item.quantity),
-                    item.discountLabel || null
+                    item.discountLabel || null,
+                    item.img || null
                 ]);
 
                 await db.query(itemSql, [values]);

@@ -30,6 +30,7 @@ const ensureCommerceColumns = async () => {
     'ALTER TABLE order_items ADD COLUMN original_price DECIMAL(10,2) NULL',
     'ALTER TABLE order_items ADD COLUMN discount_amount DECIMAL(10,2) NOT NULL DEFAULT 0',
     'ALTER TABLE order_items ADD COLUMN discount_label VARCHAR(100) NULL',
+    'ALTER TABLE order_items ADD COLUMN product_image TEXT NULL',
   ];
   for (const sql of migrations) {
     try { await pool.query(sql); } catch (error: any) {

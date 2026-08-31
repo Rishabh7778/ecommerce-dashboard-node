@@ -10,6 +10,7 @@ import {
     getDashboardStats,
     addReview,
     getProductReviews
+    ,removeDailyDeal
 } from '../controllers/productController';
 import { upload } from '../middlewares/cloudinaryConfig';
 import { verifyToken } from '../middlewares/authMIddleware'; 
@@ -38,6 +39,7 @@ router.get('/get/:id', getProductById);
 router.get('/review/:id', getProductReviews);
 
 router.put('/update/:id', upload.array('images', 10), updateProduct);
+router.put('/daily-deal/remove/:id', removeDailyDeal);
 router.delete('/delete/:id', deleteProduct);
 
 export default router;

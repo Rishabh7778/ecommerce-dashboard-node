@@ -21,7 +21,7 @@ export const getMyOrders = async (req: any, res: Response) => {
                 a.fullName, a.city, a.pincode,
                 oi.product_id,
                 oi.product_name AS products,
-                p.img AS product_image,
+                COALESCE(oi.product_image, p.img, (SELECT img FROM products WHERE title = oi.product_name LIMIT 1)) AS product_image,
                 oi.original_price, oi.discount_amount, oi.discount_label
             FROM orders o
             LEFT JOIN addresses a ON o.address_id = a.id
@@ -59,7 +59,7 @@ export const getAllOrdersAdmin = async (req: any, res: Response) => {
                 u.email AS userEmail,
                 oi.product_id,
                 oi.product_name AS products,
-                p.img AS product_image,
+                COALESCE(oi.product_image, p.img, (SELECT img FROM products WHERE title = oi.product_name LIMIT 1)) AS product_image,
                 oi.original_price, oi.discount_amount, oi.discount_label
             FROM orders o
             LEFT JOIN users u ON o.user_id = u.id

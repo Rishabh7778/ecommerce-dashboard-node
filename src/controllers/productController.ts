@@ -436,3 +436,20 @@ export const getProductReviews = async (req: any, res: any) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+// Daily deal removal only changes deal fields, so it does not depend on a multipart product form.
+export const removeDailyDeal = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const [result] = await db.execute<ResultSetHeader>(
+            "UPDATE products SET discount = 0, badge = 'None' WHERE id = ?",
+            [req.params.id]
+        );
+        if (result.affectedRows === 0) {
+            res.status(404).json({ message: 'Product not found' });
+            return;
+        }
+        res.status(200).json({ success: true, message: 'Daily deal removed' });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};
