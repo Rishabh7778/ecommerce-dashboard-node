@@ -184,6 +184,12 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
     try {
         const { id } = req.params;
         const data = req.body;
+        // HTML forms and API responses can send ISO timestamps; MySQL DATE accepts YYYY-MM-DD only.
+        const toMySqlDate = (value: unknown) => {
+            if (!value) return null;
+            const dateValue = String(value);
+            return dateValue.includes('T') ? dateValue.split('T')[0] : dateValue;
+        };
 
         // 🔥 FIX: Frontend se 'existingImage' aa raha hai, agar nayi image nahi hai toh isko rakho
         let imageUrls = data.existingImage || data.img || null; 
@@ -213,8 +219,8 @@ export const updateProduct = async (req: Request, res: Response): Promise<void> 
             data.sku || null, 
             data.stockCount || 0, 
             data.weight || null, 
-            data.mfgDate || null, 
-            data.expiryDate || null, 
+            toMySqlDate(data.mfgDate), 
+            toMySqlDate(data.expiryDate), 
             data.badge || 'None', 
             data.badgeColor || '#3BB77E', 
             data.discount || 0, 
@@ -343,7 +349,7 @@ export const getDashboardStats = async (req: any, res: any) => {
             SELECT DAYNAME(created_at) as name, SUM(amount) as value 
             FROM orders 
             WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
-            GROUP BY DATE(created_at)
+            GROUP BY DATE(created_at), DAYNAME(created_at)
             ORDER BY DATE(created_at) ASC
         `);
 
