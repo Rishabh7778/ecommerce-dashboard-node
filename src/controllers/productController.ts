@@ -159,7 +159,8 @@ export const getProductById = async (req: Request, res: Response): Promise<void>
     try {
         const { id } = req.params;
         const sql = `
-            SELECT p.*, c.name as categoryName 
+            SELECT p.*, c.name as categoryName,
+                COALESCE((SELECT d.discount_percentage FROM deals_of_the_day d WHERE d.product_id = p.id AND d.target_date > NOW() ORDER BY d.target_date ASC LIMIT 1), 0) AS deal_discount
             FROM products p
             LEFT JOIN categories c ON p.category_id = c.id
             WHERE p.id = ?

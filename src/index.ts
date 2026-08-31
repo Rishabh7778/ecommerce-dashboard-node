@@ -21,8 +21,8 @@ app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
 
-//  'https://tiny-maamoul-ab5c83.netlify.app'
 // origin: ['http://localhost:5173', 'https://tiny-maamoul-ab5c83.netlify.app'],
+//  'https://tiny-maamoul-ab5c83.netlify.app'
 
 const server = http.createServer(app);
 

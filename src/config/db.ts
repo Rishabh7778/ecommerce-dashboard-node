@@ -22,4 +22,21 @@ pool.getConnection()
     console.error('❌ MySQL Database Connection Failed: ', err.message);
   });
 
+// Backward-compatible fields for deal pricing and order-price audit.
+// Existing databases are updated once at startup; duplicate-column errors are harmless.
+const ensureCommerceColumns = async () => {
+  const migrations = [
+    'ALTER TABLE deals_of_the_day ADD COLUMN discount_percentage DECIMAL(5,2) NOT NULL DEFAULT 0',
+    'ALTER TABLE order_items ADD COLUMN original_price DECIMAL(10,2) NULL',
+    'ALTER TABLE order_items ADD COLUMN discount_amount DECIMAL(10,2) NOT NULL DEFAULT 0',
+    'ALTER TABLE order_items ADD COLUMN discount_label VARCHAR(100) NULL',
+  ];
+  for (const sql of migrations) {
+    try { await pool.query(sql); } catch (error: any) {
+      if (error?.code !== 'ER_DUP_FIELDNAME') console.error('Database migration warning:', error.message);
+    }
+  }
+};
+ensureCommerceColumns();
+
 export default pool;

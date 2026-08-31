@@ -32,8 +32,9 @@ export const getDeals = async (req: Request, res: Response) => {
                 p.id AS productId,
                 p.title, 
                 IFNULL(p.brand, 'Generic') AS brand, 
-                p.price, 
-                IFNULL(p.oldPrice, p.price) AS oldPrice, 
+                p.price AS oldPrice,
+                d.discount_percentage AS discountPercentage,
+                ROUND(p.price * (1 - d.discount_percentage / 100), 2) AS price,
                 p.img, 
                 (UNIX_TIMESTAMP(d.target_date) * 1000) AS targetDate 
             FROM deals_of_the_day d
@@ -54,7 +55,7 @@ export const getDeals = async (req: Request, res: Response) => {
 // ==========================================
 export const createDealFromProduct = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { productId, targetDate } = req.body;
+        const { productId, targetDate, discountPercentage = 0 } = req.body;
 
         if (!productId || !targetDate) {
             res.status(400).json({ message: "Product ID and Target Date are required!" });
@@ -62,9 +63,9 @@ export const createDealFromProduct = async (req: Request, res: Response): Promis
         }
 
         // 🔥 FIX: Nayi table ke hisaab se sirf product_id aur target_date insert karenge
-        const sql = `INSERT INTO deals_of_the_day (product_id, target_date) VALUES (?, ?)`;
+        const sql = `INSERT INTO deals_of_the_day (product_id, target_date, discount_percentage) VALUES (?, ?, ?)`;
 
-        const [result] = await db.query<ResultSetHeader>(sql, [productId, targetDate]);
+        const [result] = await db.query<ResultSetHeader>(sql, [productId, targetDate, discountPercentage]);
 
         res.status(201).json({ 
             message: "Product added to Deals of the Day!", 
